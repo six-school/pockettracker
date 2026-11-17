@@ -44,7 +44,7 @@ PocketTracker is a sample-based music tracker for Android handhelds and budget A
 
 **New to trackers?** A tracker is a music sequencer where notes are arranged in a grid, with time flowing downward. Each row is a step, each column carries a parameter (note, instrument, volume, effect). Songs are built by chaining together short patterns called **phrases**, grouped into **chains**, arranged in a **song**. Think of it as building music from small, reusable blocks.
 
-PocketTracker stores everything in a single project file (`.ptp`). Sounds come from standard `.wav` files or **SoundFont (SF2 / SF3)** files that you load yourself — there are no bundled samples.
+PocketTracker stores everything in a single project file (`.ptp`). Sounds come from standard `.wav` files or **SoundFont (SF2 / SF3)** files that you load yourself (there are no bundled samples), or from **MACRO**, a built-in synth with 47 models that needs no file.
 
 ### Minimum requirements
 
@@ -125,12 +125,14 @@ WAV exports are saved to:
 <home>/Renders/
 ```
 
-Resampled instruments and CHOP exports are saved to:
+Resampled instruments are saved to:
 
 ```
 <home>/Samples/Resampled/
-<home>/Samples/Chops/{name}/
 ```
+
+The SAMPLE EDITOR's SAVE and CHOP write beside the file the sample came from (into `Samples/` for a
+sample with no file).
 
 On Linux, Windows, PortMaster handhelds and the Miyoo Mini there is no folder to choose: the app owns a `PocketTracker` folder of its own and the same ten sub-folders live in it.
 
@@ -142,7 +144,7 @@ The entire UI renders at a fixed **640×480** pixel canvas, letterboxed on large
 
 ```
 ┌────────────────────────────────────────────────┐
-│  VISUALIZER  (620×70 px)                       │
+│  TOP PANEL  (620×70 px)                        │
 ├──────────────────────────────┬─────────────────┤
 │                              │  NAV MAP        │
 │  MAIN EDITOR                 │  (80×105 px)    │
@@ -152,27 +154,27 @@ The entire UI renders at a fixed **640×480** pixel canvas, letterboxed on large
 └──────────────────────────────┴─────────────────┘
 ```
 
-**Visualizer** — the top bar displays real-time audio. It has six display modes you can switch in SETTINGS:
+**Top panel** — the strip across the top. **SETTINGS → TOP PANEL** picks what it shows:
 
 | Mode | What it shows |
 |---|---|
-| SCOPE | Classic oscilloscope waveform (ProTracker-style pixel dots) |
-| FLAT | Blank bar (saves battery / CPU) |
 | OCTA | Mini-scopes side by side, one per active track |
 | OCTA.F | All 8 track scopes at once (active or not) |
-| SPECT | 40-bin FFT spectrum |
 | SPCT.P | FFT spectrum with peak-hold dots |
+| EMPTY | Blank bar (saves battery / CPU) |
+| GUIDE | What the cell under the cursor is, and its controls (see §5.2, *The guide*) |
 
 **Main editor** — the active screen (PHRASE, CHAIN, SONG, etc.).
 
-**Navigation map** — a miniature 5×5 grid in the top-right showing your position in the screen layout.
+**Navigation map** — a miniature 5×5 grid in the bottom-right showing your position in the screen layout.
+While R is held, the current screen's letter wears the cursor.
 
 **Status line** — brief messages (e.g., `SAVED`, `RESAMPLED TO INST 0C`) that auto-dismiss after a few seconds.
 
 Some screens (SAMPLE EDITOR, EQ EDITOR, THEME EDITOR) open as full-screen overlays that temporarily replace the main layout.
 
 > [!TIP]
-> If you're on a low-power device and notice audio hiccups, switch the visualizer to **FLAT** — it disables the real-time waveform rendering and frees up CPU for the audio engine.
+> If you're on a low-power device and notice audio hiccups, switch the top panel to **EMPTY** — it disables the real-time waveform rendering and frees up CPU for the audio engine.
 
 ---
 
@@ -269,13 +271,27 @@ Both keyboard and gamepad work simultaneously.
 
 #### Help on SELECT
 
-Tap **SELECT** for help on the cell the cursor is on. **SETTINGS → HELP** chooses what you get:
+Tap **SELECT** for help on the cell the cursor is on: a page over the screen that says what the cell is and
+lists every control it has. Any button closes it, and that press does nothing else.
 
-- **SHORT** — the visualizer strip at the top of the screen becomes three lines describing the cell. Tap **SELECT** again, or press any other button, to put it away. On the sample editor it appears in place of the waveform. The file browser has no room for it, so there it shows nothing.
-- **FULL** — a help screen over everything: the same text, and a longer description where one has been written. Any button closes it, and that press does nothing else.
-- **OFF** — **SELECT** shows no help.
+#### The guide
 
-The strip uses the theme's **VIZ BG** and **VIZ WAVE** colours.
+With **SETTINGS → TOP PANEL** set to **GUIDE**, the top panel shows three lines that follow the cursor: what
+the cell is, then its two main controls. On an empty cell of SONG, CHAIN or PHRASE they say how to fill it.
+The two control lines change with what you hold:
+
+| Held | The guide shows |
+|---|---|
+| R | The screens R + D-pad leads to from here, by name, and what else R does on this screen |
+| L | What the clipboard holds, and what L does on this screen |
+| B | The B combinations of this screen |
+| A, on a frequency or a time | The value in Hz or ms |
+| *(a selection is up)* | The size of the selection, and the buttons that work on it |
+
+On SONG in LIVE mode the lines say what START does there. A status message takes the first line while it
+lasts. The sample editor and the file browser have no top panel, so they have no guide.
+
+The app asks once, when it starts, whether to turn the guide on.
 
 ---
 
@@ -292,7 +308,7 @@ Hold **A** and press a direction to edit the value under the cursor:
 | A + B | Delete / clear value |
 
 - **Key repeat is active:** hold the combo for ~400 ms and it starts repeating, speeding up to ~30/s. Both can be changed in `config.json` — see [section 27](#27-configuration-file-configjson).
-- While A is held on a frequency or a time, the visualizer strip spells it out: a filter's FREQ and `CUT`/`LPF`/`HPF`/`BPF` in Hz, an LFO's FREQ, envelope times, `LAT`, `KIL`, `PSL`, `LEG`, `TIC`, EXTERNAL LEN and a groove step in ms at the song's tempo, and the reverb's PRE, DCAY and DAMP and the delay's TIME, `TIM` and TONE. On a `CHD` it names the chord.
+- While A is held on a frequency or a time, the top panel spells it out: a filter's FREQ and `CUT`/`LPF`/`HPF`/`BPF` in Hz, an LFO's FREQ, envelope times, `LAT`, `KIL`, `PSL`, `LEG`, `TIC`, EXTERNAL LEN and a groove step in ms at the song's tempo, and the reverb's PRE, DCAY and DAMP and the delay's TIME, `TIM` and TONE. On a `CHD` it names the chord.
 - For **note values**, large step = ±12 semitones (one octave).
 - For **hex byte values**, large step = ±0x10.
 - Under a scale, a note's small step is the next note **of that scale** rather than the next semitone — see [section 14](#14-scale-screen). The large step stays a full octave.
@@ -350,13 +366,15 @@ Works on PHRASE, CHAIN, SONG, and TABLE screens.
 
 | Input | Action |
 |---|---|
-| L + B | Enter selection mode (tap again to cycle: CELL → ROW → SCREEN) |
+| L + B | Enter selection mode. Each **L + B** after that widens it: CELL → ROW → SCREEN, then CELL again |
 | B (in selection) | Copy selection, exit selection mode |
 | L + A (in selection) | Cut (copy + clear), exit selection mode |
 | L + A (outside selection) | Paste clipboard at cursor |
 | A + B (in selection) | Delete selection (no clipboard), exit selection mode |
-| L + B + A | Deep-clone the chain or phrase under the cursor into the next free slot |
+| L + B, then A | Deep-clone the chain or phrase under the cursor into the next free slot. Hold **L**, press **B**, then **A** — B may be let go before the A, L may not |
 | L + R | Leave selection mode (nothing copied) |
+
+> On SONG, CHAIN and PHRASE, an **A** pressed while **L** is still held from the **L + B** clones. To cut a selection you have only just made, let go of **L** and press **L + A**.
 
 **Selection increment:** In selection mode, **A + D-pad** steps the selected values — LEFT/RIGHT by one,
 UP/DOWN by the large step. On SONG that is the whole selection; on CHAIN, PHRASE and TABLE, the cursor's
@@ -365,7 +383,7 @@ what A would put there, and they step together.
 
 **Clearing the clipboard:** the copy buffer deliberately survives leaving a selection — you can select
 again by accident without losing what you copied. Press **L + R** when you are *not* selecting to clear
-it, which is also how you dismiss the clipboard readout in the top strip.
+it, which is also how you dismiss the clipboard readout in the top panel.
 
 **L + R** also restores muted and soloed tracks (§5.7). It undoes one thing per press, most recent
 first: if you muted a channel after making a selection, the first press brings the channel back and
@@ -577,7 +595,7 @@ Notes are written as pitch + octave: `C-4`, `C#4`, `D-4`, … `G-9`. Range is **
 | A + LEFT/RIGHT | +1 / −1 semitone (note — or the next note of the scale, see [section 14](#14-scale-screen)), +1 / −1 (other values) |
 | A + UP/DOWN | ±1 octave (note), ±16 (other values) |
 | A + B | Delete value at cursor |
-| A + B on an empty note | Insert **OFF** — the note sounding on the track is let go |
+| A + B on an empty note | Insert **OFF** — the note sounding on the track is let go (see [How a note ends](#how-a-note-ends)) |
 | B + LEFT/RIGHT | Switch to previous / next phrase |
 | R + B on a command | Switch it off / on — it stays in its cell, drawn dim, and plays as an empty one. Let go of B before R to switch it back; a selection switches every command in it |
 | L + R | Switch every command in this phrase back on — one thing per press, most recent first, as with muted tracks |
@@ -652,7 +670,7 @@ works stays lit even when its two halves are in different phrases of the same ch
 
 ## 10. INSTRUMENT Screen
 
-The INSTRUMENT screen configures how a sample or SF2 preset is played, or what an outside MIDI device is sent.
+The INSTRUMENT screen configures how a sample or SF2 preset is played, which synth model a MACRO instrument plays, or what an outside MIDI device is sent.
 
 Navigate here with **R+RIGHT** from PHRASE. Use **B+LEFT/RIGHT** to switch between instruments without leaving the screen, and **B+UP/DOWN** to jump 16 at a time.
 
@@ -660,7 +678,7 @@ Navigate here with **R+RIGHT** from PHRASE. Use **B+LEFT/RIGHT** to switch betwe
 
 | Parameter | Range | Description |
 |---|---|---|
-| TYPE | — | The instrument kind, with two buttons to the right of its value. **LOAD** opens the file browser; **EDIT >** opens the SAMPLE EDITOR. Press **A** on either. ⚠️ **EDIT >** is not drawn on a SoundFont — there is no single waveform to edit — and an EXTERNAL instrument has neither button. Changing the type of an instrument with a sound file or settings of its own asks first: **DISCARD** starts the new type afresh, **KEEP** takes the settings along, **CANCEL** leaves it. Both keep the level, pan, sends, EQ and table. |
+| TYPE | — | The instrument kind, with two buttons to the right of its value. **LOAD** opens the file browser; **EDIT >** opens the SAMPLE EDITOR. Press **A** on either. ⚠️ **EDIT >** is not drawn on a SoundFont — there is no single waveform to edit — and EXTERNAL and MACRO instruments have neither button. Changing the type of an instrument with a sound file or settings of its own asks first: **DISCARD** starts the new type afresh, **KEEP** takes the settings along, **CANCEL** leaves it. Both keep the level, pan, sends, EQ and table. |
 | NAME | — | Instrument name. Press A to edit it on the keyboard overlay. |
 | ROOT | C-0 – G-9 | The pitch of the sample as recorded. |
 | DETUNE | 00–FF | Fine tuning. `80` = center (no detune). |
@@ -718,6 +736,83 @@ OUTPUT row ([section 22](#22-midi-screen)). Choose it with A + D-pad on TYPE.
 | CC A – CC D | `--` / 00–7F | Four controller slots, each a controller number and the **VAL** to send to it. A filled slot is sent with every note; `CCA`–`CCD` move it from a phrase (section 23). |
 | BEND | 01–48 | How many semitones the device bends at full wheel. The pitch commands are scaled to it, and the device is told it before the first bend. A device that does not take that message needs the same number set on it. |
 
+### MACRO instrument parameters
+
+A MACRO instrument is a synth: there is no file to load, and its sound is one of 47 models. Choose it
+with A + D-pad on TYPE. Each model is played by two controls, TIMBRE and COLOR, and what they do
+depends on the model: the screen says, beside each of the three cells. The oscillators are Émilie
+Gillet's Braids, under the MIT licence (see `CREDITS.md`).
+
+| Parameter | Range | Description |
+|---|---|---|
+| MODEL | `CSAW` – `QPSK` | The model, by its four-letter name, with what it is beside it. A + LEFT/RIGHT steps one model, A + UP/DOWN eight. A change is heard from the next note. A + B goes back to `CSAW`. |
+| TIMBRE | 00–FF | The model's first control (see the table below). `80` by default. A change moves a note already sounding, and so do `TMB`, a ramp and a TIMB modulation slot. |
+| COLOR | 00–FF | The model's second control. `80` by default. `CLR` and COLR move it the same way. |
+
+ROOT, DETUNE, TIC, VOL, TSP, PAN, DRIVE, FILTER, CRUSH, FREQ, DWNSMPL, RES, REV, DEL and EQ work as
+on a WAV instrument. Playing the ROOT note sounds C-4, as on a SoundFont. What only a sample has does
+nothing on a MACRO instrument: `OFF`, `SLI`, `BCK`, `LPO` and the STA modulation destination.
+
+A MACRO note **holds until something ends it**: the next note on the track, an OFF, a `KIL` or
+stopping playback. That goes for a drum or a plucked string too, after its sound has died away. To
+give a note a definite length, put an **AHD** or **DRUM** on VOL on the MODULATION screen; that also
+lets a hit ring on after a MIDI key is let go. See [How a note ends](#how-a-note-ends).
+
+`CHD` plays its chord on four oscillators, and `ARC` strums it as on any instrument.
+
+| Model | What it is | TIMBRE | COLOR |
+|---|---|---|---|
+| `CSAW` | CS-80 saw | Notch width | Notch polarity |
+| `MRPH` | Variable wave | Waveshape | Distort / filter |
+| `SWSQ` | Saw / square | Pulse width | Saw to square |
+| `FOLD` | Wavefolder | Fold amount | Sine to triangle |
+| `BUZZ` | Harmonic combs | Smoothness | Detune |
+| `SUBQ` | Square + sub | Pulse width | Sub -2 / -1 oct |
+| `SUBS` | Saw + sub | Saw shape | Sub -2 / -1 oct |
+| `SYNQ` | Synced square | Frequency ratio | Balance |
+| `SYNS` | Synced saw | Frequency ratio | Balance |
+| `SAW3` | Triple saw | Osc 2 detune | Osc 3 detune |
+| `SQR3` | Triple square | Osc 2 detune | Osc 3 detune |
+| `TRI3` | Triple triangle | Osc 2 detune | Osc 3 detune |
+| `SIN3` | Triple sine | Osc 2 detune | Osc 3 detune |
+| `RING` | Ring-mod sines | Osc 2 ratio | Osc 3 ratio |
+| `SWRM` | Saw swarm | Detune | High-pass filter |
+| `COMB` | Comb-filter saw | Delay time | Feedback -/+ |
+| `TOY*` | Circuit-bent toy | Sample rate | Bit toggling |
+| `ZLPF` | LP filtered wave | Cutoff | Waveshape |
+| `ZPKF` | PK filtered wave | Cutoff | Waveshape |
+| `ZBPF` | BP filtered wave | Cutoff | Waveshape |
+| `ZHPF` | HP filtered wave | Cutoff | Waveshape |
+| `VOSM` | Two formants | Formant 1 | Formant 2 |
+| `VOWL` | Lo-fi vowels | Vowel a e i o u | Gender |
+| `VFOF` | Hi-fi vowels | Vowel a e i o u | Gender |
+| `HARM` | 14 harmonics | Harmonic number | Peakedness |
+| `FM` | 2-operator FM | Modulation index | Frequency ratio |
+| `FBFM` | Feedback FM | Modulation index | Frequency ratio |
+| `WTFM` | Chaotic FM | Modulation index | Frequency ratio |
+| `PLUK` | Plucked string | Decay | Pluck position |
+| `BOWD` | Bowed string | Friction | Bow position |
+| `BLOW` | Reed | Air pressure | Geometry |
+| `FLUT` | Flute | Air pressure | Geometry |
+| `BELL` | Bell | Decay | Harmonicity |
+| `DRUM` | Metallic drum | Decay | Harmonicity |
+| `KICK` | 808 bass drum | Decay | Brightness |
+| `CYMB` | Cymbal noise | Cutoff | Noisiness |
+| `SNAR` | 808 snare drum | Tone | Noisiness/decay |
+| `WTBL` | 21 wavetables | Position | Table |
+| `WMAP` | 16x16 wave map | X position | Y position |
+| `WLIN` | Wavetable scan | Position | Interpolation |
+| `WTX4` | Wavetable chords | Position | Chord type |
+| `NOIS` | Tuned noise | Resonance | LP to HP |
+| `TWNQ` | Twin-peak noise | Resonance | Peak spacing |
+| `CLKN` | Clocked noise | Cycle length | Quantization |
+| `CLOU` | Grain cloud | Grain density | Freq dispersion |
+| `PRTC` | Droplets | Grain density | Freq dispersion |
+| `QPSK` | Modem noise | Bit rate | Data |
+
+> [!TIP]
+> The models differ a lot in level: a plain wave such as `SQR3` is far louder than `BELL` or `PLUK`. Balance them with VOL.
+
 ### Volume chain
 
 Volume is applied in this order:
@@ -767,6 +862,29 @@ Without an ADSR envelope the loop repeats indefinitely until the voice is killed
 
 > [!NOTE]
 > Set **LOOP END** below **END** to reserve a release tail. Leaving **LOOP END = FF** makes the loop run to the sample end (the classic behaviour) with no separate tail.
+
+### How a note ends
+
+A track plays one note at a time; a chord counts as one. What ends it, and how, depends on the
+instrument:
+
+| What happens | A sample played once | A looping sample, or MACRO | SoundFont | EXTERNAL |
+|---|---|---|---|---|
+| The next note on the track | A short fade | A short fade | A short fade | A note-off |
+| An **OFF** in the note column | An ADSR or TRIG on VOL plays its release; otherwise a short fade | The same | The SoundFont's own release | A note-off |
+| `KIL` | A short fade, whatever envelope | The same | A short fade | A note-off |
+| Letting go of a MIDI key | Plays out | An ADSR or TRIG on VOL plays its release. MACRO under an AHD or DRUM on VOL plays out. Otherwise a short fade | The SoundFont's own release | A note-off |
+| Nothing at all | Ends at the sample's END | Ends when every AHD, DRUM, ADSR or TRIG on VOL has finished (an ADSR or TRIG only after its release). With none, never | Ends when the SoundFont's sound does | Ends after LEN ticks; LEN `00` never |
+| Stopping playback | A short fade | A short fade | A short fade | A note-off |
+
+A short fade takes a few milliseconds, just enough not to click.
+
+`LEG` on the next note is the one exception to the first row: the note already sounding moves to the
+new pitch and carries on.
+
+**The OFF note.** On the PHRASE screen, press **A + B** on an empty note cell to write an OFF. It ends
+the track's note as the table says, playing a release where the instrument has one: the way to let a
+held note go without starting another. An OFF writes no instrument and plays nothing new.
 
 ### Navigating instruments
 
@@ -952,7 +1070,7 @@ neighbours — its number follows its position — and deleting one renumbers th
 > Anything that changes the sample's **length** — CROP, CUT, DUPL, PASTE, DEL, UNDO, a resizing SYNC —
 > clears every slice boundary, including the ones the file arrived with.
 
-**CHOP** — exports each slice as a separate WAV file to `Samples/Chops/{name}/`.
+**CHOP** — exports each slice as a separate WAV file to a `{name}/` folder beside the sample's file.
 
 > [!TIP]
 > After using CHOP, you need to manually load the individual slice files onto new instrument slots. There is no automatic batch-load — but using numbered filenames (which CHOP generates) makes the process fast.
@@ -1041,7 +1159,7 @@ threes under a volume moving in fours.
 ```
 
 A table `AUS` can move **VOL**, **PAN**, **CUT**, **RES**, **LPF**, **HPF**, **BPF**, **DRV**, **FIN**,
-**TIM**, **EQN** and **EQM**; anything else to its left is
+**TMB**, **CLR**, **TIM**, **EQN** and **EQM**; anything else to its left is
 passed over. The fade follows the playhead of the column holding the value it is moving — `CUT` in
 FX1 above, so that fade runs at FX1's speed whichever column the `AUS` sits in. **HOP steers it** —
 back to the `AUS` row restarts it, into the middle picks it up there, past the `AUF` ends it. A `TIC`
@@ -1267,6 +1385,9 @@ Navigate here: **R+UP** from INSTRUMENT (column 3).
 | LFO | Cyclic oscillator |
 | TRIG | Envelope triggered by note, behaves like ADSR |
 
+On VOL, an AHD or DRUM gives a note a definite length, and an ADSR or TRIG holds it until it is let
+go. See [How a note ends](#how-a-note-ends).
+
 ### Modulation destinations
 
 | Dest | Affects |
@@ -1281,6 +1402,8 @@ Navigate here: **R+UP** from INSTRUMENT (column 3).
 | MOD A | Depth of the next mod slot |
 | MOD R | Speed of the next mod slot |
 | MOD B | Both depth and speed of the next mod slot |
+| TIMB | A MACRO instrument's TIMBRE (nothing on other types) |
+| COLR | A MACRO instrument's COLOR (nothing on other types) |
 
 ### Layout
 
@@ -1411,7 +1534,7 @@ Navigate here: **R+DOWN** from MIXER, or **R+DOWN** twice from any Row 2 screen.
 |---|---|
 | *preset name* | The first line of the section. **A + D-pad** on the name walks the built-in presets, from **DEFAULT** through small rooms to long halls and plates. Landing on one sets every cell of the section except EQ. Turn a cell afterwards and a `*` appears in front of the name; `----` is a reverb set by hand that no built-in matches. **A + B** goes back to DEFAULT, the reverb a new project starts with. |
 | SAVE / LOAD | To the right of the name. **SAVE** names the reverb and writes every cell of the section except EQ to `PocketTracker/Presets/Reverbs` as a `.ptr` file; **LOAD** reads one back, into this or any other project. |
-| ALGO | Which reverb the cells below drive: **OLD** (the original), **HALL** (a large space), **ROOM** (a small one), **PLATE** and **FOIL** (metal plates — they have no room, so they ignore SIZE and MOD). Turning it changes no other cell. |
+| ALGO | Which reverb the cells below drive: **DEFAULT** (the app's own reverb), **HALL** (a large space), **ROOM** (a small one), **PLATE** and **FOIL** (metal plates — they have no room, so they ignore SIZE and MOD). Turning it changes no other cell. |
 | PRE | Pre-delay (`00`–`FF`) — a gap of up to 150 ms before the tail starts, so the sound stays in front of it. `00` starts it immediately. |
 | SIZE | Size of the room (`00`–`FF`) — how far apart its walls are. A bigger room also makes the movement from MOD slower. It does not change how long the tail rings or how loud it is. |
 | DCAY | Length of the reverb tail (`00`–`FF`), from about half a second to about twenty-five, whatever the room. `FF` is a tail that never ends. The level stays where it is as you turn it. |
@@ -1597,8 +1720,7 @@ All value rows are edited with **A + D-pad**. A single **A** press is reserved f
 | ONE HAND | ON / OFF (+ MS) | For playing with one hand. With it on, **A**, **B**, **L**, **R** or **SELECT** held alone for a moment and let go stays down until you press it again, so a combination can be played one button at a time: lock R, then press B to mute. Its letter shows under the note monitor while it is held. A lock lets go by itself after a combination done in one go — delete, cut, paste, clone, a new selection — and when a question box opens; it stays for the ones you repeat, such as A + D-pad or a mute. **MS**, shown while it is on, sets how long the hold takes, from 150 to 1000 ms (300 by default). |
 | FOLDER | REMEMBER / REFRESH | With REMEMBER, a sample load reopens at the folder you last loaded a sample from, for as long as the app is running. With REFRESH it always starts at the default (or at whatever `config.json` names — see section 27). |
 | NOTE PREV | ON / OFF | On the PHRASE screen, play the note under the cursor for as long as you hold **A** — when you insert it, change it with A + D-pad, or just hold A on it. Not in selection mode, and not while playing. |
-| VISUALIZER | SCOPE / FLAT / OCTA / OCTA.F / SPECT / SPCT.P | Visualizer mode for the top bar (see §3 for descriptions). |
-| HELP | OFF / SHORT / FULL | What a tap of **SELECT** shows: nothing, three lines in the visualizer strip, or a full help screen (see §5.2, *Help on SELECT*). |
+| TOP PANEL | OCTA / OCTA.F / SPCT.P / EMPTY / GUIDE | What the strip across the top shows: a visualizer, nothing, or the guide (see §3 for descriptions). |
 | THEME | theme name > | Shows the current theme name. Press A to open the THEME EDITOR. |
 | TEMPLATE | SAVE / CLEAR | SAVE stores the current project as a template for new projects. CLEAR removes the saved template. |
 | ABXY | AUTO / XBOX / NINTENDO | Which face button your controller has **printed** A. Appears only while a controller is attached. **AUTO** trusts the controller and is right for a handheld's built-in pad and for a real Switch pad. Use **NINTENDO** if A is the right-hand button but the app reads it as B - common with 8BitDo pads in XInput mode, which report themselves as Xbox controllers. **XBOX** = A is the bottom button. Keyboard keys are never affected. |
@@ -1764,6 +1886,10 @@ from its first sound; the next note starts from the instrument again.
 
 Keys are played, not recorded: nothing is written into the phrase.
 
+Letting go of a key releases its note: an ADSR or TRIG on VOL plays its release, while a sample that
+plays once rings on, and so does a MACRO note under an AHD or DRUM on VOL.
+See [How a note ends](#how-a-note-ends).
+
 ### Following another device
 
 With **SYNC IN** on, another device's MIDI clock leads — a drum machine, a DAW, or a second
@@ -1872,7 +1998,7 @@ Persists across steps. Configure with **ARC**.
 
 The row's note plays as a chord of four notes, on its own track and through the instrument's one
 filter and effects. `X` picks the chord, `Y` how its notes are laid out. Hold **A** on the value to
-see the chord's name and notes over the visualizer.
+see the chord's name and notes in the top panel.
 
 | X | Chord | X | Chord |
 |---|---|---|---|
@@ -2323,6 +2449,7 @@ skipping any that are not:
 | `LPF` `HPF` `BPF` | the cutoff of the filter they switch on |
 | `DRV` | the overdrive amount |
 | `FIN` | the fine tune — end to end is a two-semitone glide |
+| `TMB` `CLR` | a MACRO note's TIMBRE and COLOR |
 | `PVB` `PVX` | the vibrato — its speed and its depth each slide on their own |
 | `CHD` | the chord — each note slides to its place in the `AUF`'s chord (not on an EXTERNAL instrument) |
 | `EQN` | this track's EQ — **between two presets** (see below) |
@@ -2472,6 +2599,23 @@ apart beat against each other.
 It **retunes the note that is already playing**, so it can be written on a step of its own to bend a
 held note, and an `AUS`/`AUF` ramp across the whole byte is a two-semitone glide. On the same step as
 a note it tunes that note. Gone at the next note, like `CUT` and `DRV`, and it works on a table row.
+
+---
+
+### TMB `XX` — Timbre · CLR `XX` — Color
+
+Set a MACRO instrument's TIMBRE or COLOR for **this note**: the same two controls the INSTRUMENT screen
+holds, `00`–`FF`. What they shape depends on the model ([section 10](#macro-instrument-parameters)).
+On the same step as a note they are that note's values from its first sound; on a step of their own
+they move the note already playing, over a few milliseconds.
+
+```
+    00    C-3   TMB 20               ← a dark ZLPF note (its TIMBRE is the cutoff)
+    04    ---   TMB C0               ← opened up while it holds
+```
+
+The next note starts from the instrument's own values again. Both ramp with `AUS`/`AUF`, work on a
+table row, and do nothing on any other instrument type.
 
 ---
 
@@ -2665,8 +2809,7 @@ modifiers.
 
 **Moving and copying several files** works like the tracker's own copy/paste:
 
-1. **L + B** starts a selection at the cursor. Tap **L + B** again inside half a second to select
-   everything in the folder.
+1. **L + B** starts a selection at the cursor. **L + B** again selects everything in the folder.
 2. **D-pad UP/DOWN** stretches the selection.
 3. **B** copies the selected files, or **L + A** cuts them. Either way the selection ends and the
    status line reports how many files are on the clipboard.
@@ -2753,7 +2896,7 @@ Output: `<home>/Samples/Resampled/Resample_0001.wav`, …
 
 When slice markers are set in the SAMPLE EDITOR, use CHOP to export each slice as a separate WAV:
 
-Output: `<home>/Samples/Chops/{instrument_name}/`
+Output: a `{instrument_name}/` folder beside the sample's file (in `<home>/Samples/` for a sample with no file).
 
 > [!NOTE]
 > CHOP exports do not automatically load into instrument slots. After chopping, open the INSTRUMENT screen and use the file browser to load the individual slice files onto new instruments.
@@ -3113,13 +3256,13 @@ exports and sample-editor saves keep their own folders.
 
 | Input | Action |
 |---|---|
-| L + B | Enter selection mode (tap again: CELL → ROW → SCREEN) |
+| L + B | Enter selection mode (again: CELL → ROW → SCREEN) |
 | B *(in selection)* | Copy, exit selection |
 | L + A *(in selection)* | Cut (copy + clear), exit selection |
 | L + A *(outside selection)* | Paste at cursor |
 | A + B *(in selection)* | Delete selection (no clipboard), exit |
 | A + D-pad *(in selection)* | Step the selected values (SONG: all; elsewhere the cursor's column); empty cells stay empty |
-| L + B + A | Deep-clone the chain / phrase under the cursor |
+| L + B, then A | Deep-clone the chain / phrase under the cursor (L held throughout) |
 | L + D-pad | Fill rows from one cell (PHRASE) |
 | L + R *(in selection)* | Leave selection mode; the copy buffer survives |
 | L + R *(outside selection)* | Clear the copy buffer |
@@ -3153,7 +3296,7 @@ exports and sample-editor saves keep their own folders.
 | SELECT + A | Rename |
 | SELECT + B | Delete, or delete the selection (asks first) |
 | SELECT + R | New folder |
-| L + B | Start a file selection (tap again: select all) |
+| L + B | Start a file selection (again: select all) |
 | B *(in selection)* | Copy the selected files |
 | L + A *(in selection)* | Cut them |
 | L + A *(outside selection)* | Paste them here |
@@ -3355,6 +3498,8 @@ Open with **A** on an EQ cell.
 | DRV | Overdrive | `XX` | This note's overdrive, `00` clean to `FF` heavy |
 | CRU | Crush + Downsample | `XY` | `X` = bits crushed, `Y` = rate drop; both `0` = clean |
 | FIN | Fine Tune | `XX` | `80` in tune, a semitone either way; retunes a note already playing |
+| TMB | Timbre | `XX` | A MACRO note's TIMBRE; moves a note already playing |
+| CLR | Color | `XX` | A MACRO note's COLOR; moves a note already playing |
 | TSX | Transpose Multiplier | `XX` | How far TSP moves this note: `01` normal, `00` not at all, `FF` the other way. Phrase only |
 | INS | Instrument | `XX` | This note plays instrument `XX` (00–7F); randomize it with RND or RNL. On a table row it hands the note on to that instrument and its table |
 | SCA | Track Scale | `XY` | Puts this track on scale `Y` in key `X` (`0`=C … `B`=B); resets on stop |
